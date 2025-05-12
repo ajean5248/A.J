@@ -77,6 +77,71 @@
       display: block;
       margin: 20px auto;
     }
+.chatbot-container {
+  max-width: 500px;
+  margin: auto;
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.chatbox {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  height: 250px;
+  overflow-y: auto;
+  background-color: #f9f9f9;
+  margin-bottom: 15px;
+}
+
+.message {
+  margin-bottom: 10px;
+  padding: 8px;
+  border-radius: 6px;
+  max-width: 80%;
+  word-wrap: break-word;
+}
+
+.user-msg {
+  background-color: #e0f7fa;
+  align-self: flex-end;
+  margin-left: auto;
+}
+
+.bot-msg {
+  background-color: #e8f5e9;
+  margin-right: auto;
+}
+
+.input-area {
+  display: flex;
+  gap: 10px;
+}
+
+.chat-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.chat-btn {
+  padding: 10px 16px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.chat-btn:hover {
+  background-color: #388e3c;
+}
   </style>
 </head>
 <body>
@@ -174,13 +239,24 @@
     </form>
   </section>
 
-  <section id="chatbot">
-    <h2>Chatbot</h2>
-    <div id="chatbot-container">
-      <p>Ask me about my skills or experience!</p>
-      <!-- Placeholder for chatbot -->
+<section id="chatbot">
+  <h2>Chatbot</h2>
+  <div id="app" class="chatbot-container">
+    <p>Ask me about my skills, education, or experience!</p>
+    
+    <div id="chatbox" class="chatbox">
+      <div v-for="msg in messages" :key="msg.id" :class="['message', msg.sender === 'You' ? 'user-msg' : 'bot-msg']">
+        <strong>{{ msg.sender }}:</strong> {{ msg.text }}
+      </div>
     </div>
-  </section>
+
+    <div class="input-area">
+      <input v-model="userInput" @keyup.enter="sendMessage" placeholder="Type your question..." class="chat-input" />
+      <button @click="sendMessage" class="chat-btn">Send</button>
+    </div>
+  </div>
+</section>
+    
 
   <section id="qr-code">
     <h2>QR Code</h2>
@@ -196,6 +272,50 @@
       });
     </script>
   </section>
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<script>
+  new Vue({
+    el: '#app',
+    data: {
+      userInput: '',
+      messages: []
+    },
+    methods: {
+      sendMessage() {
+        const question = this.userInput.trim();
+        if (!question) return;
 
+        this.messages.push({ id: Date.now(), sender: 'You', text: question });
+        this.userInput = '';
+
+        const answer = this.getBotResponse(question);
+        setTimeout(() => {
+          this.messages.push({ id: Date.now() + 1, sender: 'Ansley', text: answer });
+          this.scrollToBottom();
+        }, 300);
+      },
+      getBotResponse(input) {
+        input = input.toLowerCase();
+
+        if (input.includes('name')) return "I'm Ansley Jean!";
+        if (input.includes('school') || input.includes('university')) return "I study Computer Technology at Bowie State University.";
+        if (input.includes('graduate') || input.includes('graduation')) return "I'm graduating in Spring 2025.";
+        if (input.includes('skills')) return "I know Java, HTML, Excel, Ubuntu, Kali, Windows Server, and more.";
+        if (input.includes('projects')) return "Check out my projects like the tutoring appointment system, weather analysis, and secure Java apps.";
+        if (input.includes('experience') || input.includes('job')) return "I’ve worked at BJ’s, TJ Maxx, and was an Adobe Ambassador.";
+        if (input.includes('contact')) return "Use the contact form below or email me directly.";
+        if (input.includes('resume')) return "You can download my resume in the Resume section.";
+
+        return "I'm not sure, but try asking about my experience, education, or projects!";
+      },
+      scrollToBottom() {
+        this.$nextTick(() => {
+          const box = document.getElementById('chatbox');
+          box.scrollTop = box.scrollHeight;
+        });
+      }
+    }
+  });
+</script>
 </body>
 </html>
